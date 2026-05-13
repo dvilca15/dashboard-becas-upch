@@ -1,5 +1,5 @@
 import streamlit as st
-from db import load_becarios, load_perdidas, load_matricula, load_egresados, load_notas, load_orden_merito
+from db import load_becarios, load_perdidas, load_egresados, load_notas, load_orden_merito
 from secciones import resumen, matricula, perdidas, egresados, notas, orden_merito
 st.set_page_config(
     page_title="Dashboard Becas UPCH",
@@ -192,15 +192,6 @@ hr { border-color: var(--border) !important; }
 """, unsafe_allow_html=True)
 
 
-@st.cache_data(ttl=1800)
-def get_data():
-    return (load_becarios(), load_perdidas(), load_matricula(),
-            load_egresados(), load_notas(), load_orden_merito())
-
-with st.spinner("Cargando datos..."):
-    df_bec, df_per, df_mat, df_egr, df_not, df_om = get_data()
-
-
 def limpiar_carrera(nombre):
     if not isinstance(nombre, str):
         return nombre
@@ -211,8 +202,10 @@ def limpiar_carrera(nombre):
     return nombre.strip().title()
 
 
+with st.spinner("Cargando datos..."):
+    df_bec = load_becarios()
+
 df_bec["carrera"] = df_bec["carrera"].apply(limpiar_carrera)
-df_per["nombre_carrera"] = df_per["nombre_carrera"].apply(limpiar_carrera)
 
 SEMESTRES = sorted(df_bec["semestre_registro"].dropna().unique().tolist(), reverse=True)
 
@@ -242,30 +235,39 @@ sem_label = semestre_sel
 
 if page == "Resumen General":
     st.title("Resumen general de becarios")
-    st.caption(f"Vista consolidada · UPCH {sem_label}")
+    st.caption(f"Vista consolidada · UPCH · {sem_label}")
     resumen.render(df_bec, semestre_sel, carrera_sel, financiador_sel)
 
 elif page == "Matrícula":
     st.title("Matrícula de becarios")
     st.caption(f"Estado de matrícula del semestre activo · {sem_label}")
-    matricula.render(df_bec, df_mat, semestre_sel, carrera_sel, financiador_sel)
+    matricula.render(df_bec, None, semestre_sel, carrera_sel, financiador_sel)
 
 elif page == "Pérdidas de Beca":
     st.title("Pérdidas de beca")
     st.caption(f"Becarios con pérdida por rendimiento · {sem_label}")
+    with st.spinner("Cargando datos..."):
+        df_per = load_perdidas()
+    df_per["nombre_carrera"] = df_per["nombre_carrera"].apply(limpiar_carrera)
     perdidas.render(df_bec, df_per, semestre_sel, carrera_sel, financiador_sel)
 
 elif page == "Egresados":
     st.title("Egresados")
     st.caption(f"Becarios egresados por semestre · {sem_label}")
+    with st.spinner("Cargando datos..."):
+        df_egr = load_egresados()
     egresados.render(df_egr, semestre_sel, carrera_sel, financiador_sel)
 
 elif page == "Notas":
     st.title("Cursos desaprobados")
     st.caption(f"Becarios con cursos desaprobados · {sem_label}")
+    with st.spinner("Cargando datos..."):
+        df_not = load_notas()
     notas.render(df_bec, df_not, semestre_sel, carrera_sel, financiador_sel)
 
 elif page == "Orden de Mérito":
     st.title("Orden de mérito")
     st.caption(f"Promedios y ranking académico · {sem_label}")
+    with st.spinner("Cargando datos..."):
+        df_om = load_orden_merito()
     orden_merito.render(df_bec, df_om, semestre_sel, carrera_sel, financiador_sel)
