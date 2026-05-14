@@ -99,14 +99,18 @@ def render(df_bec, _df_mat, semestre_sel, carrera_sel, financiador_sel):
 
     with col4:
         section_title("Detalle estado de matrícula")
-        est_mat = df_activos["matriculado"].value_counts().reset_index()
-        est_mat.columns = ["Estado", "Cantidad"]
+        matriculados = (df_activos["matriculado"] == "MATRICULADO").sum()
+        no_matriculados = (df_activos["matriculado"] != "MATRICULADO").sum()
+        est_mat = pd.DataFrame({
+            "Estado": ["MATRICULADO", "NO MATRICULADO"],
+            "Cantidad": [matriculados, no_matriculados],
+        })
         fig = px.bar(est_mat, x="Cantidad", y="Estado", orientation="h",
-                     color_discrete_sequence=PALETTE, text="Cantidad")
+                     color_discrete_sequence=[EMERALD, DANGER], text="Cantidad")
         fig.update_traces(textposition="outside", textangle=0,
                           textfont=dict(size=10, family="JetBrains Mono"))
         fig.update_layout(**plotly_layout(
-            height=320,
+            height=180,
             xaxis=dict(range=[0, est_mat["Cantidad"].max() * 1.3], visible=False),
             yaxis=dict(autorange="reversed"),
             showlegend=False,
