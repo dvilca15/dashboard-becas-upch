@@ -116,54 +116,24 @@ def render(df_bec, _df_mat, semestre_sel, carrera_sel, financiador_sel):
     cols_tabla = ["semestre_registro", "dni", "apellidos_nombres", "carrera",
                   "financiador", "beneficio", "matriculado"]
 
-    # ── No matriculados ──────────────────────────────────────────────────────
-    section_title("Becarios activos NO matriculados")
-    df_no_mat = df_activos[df_activos["matriculado"] != "MATRICULADO"].copy()
-
-    busqueda = st.text_input("Buscar por nombre o DNI", key="busq_no_mat")
+    section_title("Detalle de becarios activos")
+    busqueda = st.text_input("Buscar por nombre o DNI")
+    df_tabla = df_activos.copy()
     if busqueda:
         mask = (
-            df_no_mat["apellidos_nombres"].astype(str).str.contains(busqueda.upper(), na=False) |
-            df_no_mat["dni"].astype(str).str.contains(busqueda, na=False)
+            df_tabla["apellidos_nombres"].astype(str).str.contains(busqueda.upper(), na=False) |
+            df_tabla["dni"].astype(str).str.contains(busqueda, na=False)
         )
-        df_no_mat = df_no_mat[mask]
+        df_tabla = df_tabla[mask]
 
-    st.dataframe(df_no_mat[[c for c in cols_tabla if c in df_no_mat.columns]].reset_index(drop=True),
-                 use_container_width=True, height=350)
+    st.dataframe(df_tabla[[c for c in cols_tabla if c in df_tabla.columns]].reset_index(drop=True),
+                 use_container_width=True, height=400)
 
     c1, c2 = st.columns(2)
     with c1:
-        st.download_button("Descargar Excel", df_to_excel_bytes(df_no_mat),
-                           "no_matriculados.xlsx",
-                           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                           key="dl_excel_no_mat")
+        st.download_button("Descargar Excel", df_to_excel_bytes(df_tabla),
+                           "becarios_activos.xlsx",
+                           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     with c2:
-        st.download_button("Descargar CSV", df_to_csv_bytes(df_no_mat),
-                           "no_matriculados.csv", "text/csv", key="dl_csv_no_mat")
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # ── Matriculados ─────────────────────────────────────────────────────────
-    section_title("Becarios activos MATRICULADOS")
-    df_mat_tab = df_activos[df_activos["matriculado"] == "MATRICULADO"].copy()
-
-    busqueda2 = st.text_input("Buscar por nombre o DNI", key="busq_mat")
-    if busqueda2:
-        mask2 = (
-            df_mat_tab["apellidos_nombres"].astype(str).str.contains(busqueda2.upper(), na=False) |
-            df_mat_tab["dni"].astype(str).str.contains(busqueda2, na=False)
-        )
-        df_mat_tab = df_mat_tab[mask2]
-
-    st.dataframe(df_mat_tab[[c for c in cols_tabla if c in df_mat_tab.columns]].reset_index(drop=True),
-                 use_container_width=True, height=350)
-
-    c3, c4 = st.columns(2)
-    with c3:
-        st.download_button("Descargar Excel", df_to_excel_bytes(df_mat_tab),
-                           "matriculados.xlsx",
-                           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                           key="dl_excel_mat")
-    with c4:
-        st.download_button("Descargar CSV", df_to_csv_bytes(df_mat_tab),
-                           "matriculados.csv", "text/csv", key="dl_csv_mat")
+        st.download_button("Descargar CSV", df_to_csv_bytes(df_tabla),
+                           "becarios_activos.csv", "text/csv")
