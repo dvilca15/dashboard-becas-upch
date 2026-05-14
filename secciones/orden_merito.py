@@ -98,16 +98,17 @@ def render(df_bec, df_om, semestre_sel, carrera_sel, financiador_sel):
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        section_title("Décimo y quinto superior por semestre")
+        section_title("Décimo, quinto y tercio superior por semestre")
         filas = []
         for sem in semestres_om_disp:
             df_s = df_om_bec[df_om_bec["semestre"] == sem]
             dec = (df_s["decimo_superior"].str.upper() == "SI").sum() if "decimo_superior" in df_s.columns else 0
             qui = (df_s["quinto_superior"].str.upper() == "SI").sum() if "quinto_superior" in df_s.columns else 0
-            filas.append({"Semestre": sem, "Décimo superior": dec, "Quinto superior": qui})
+            ter = (df_s["tercio_superior"].str.upper() == "SI").sum() if "tercio_superior" in df_s.columns else 0
+            filas.append({"Semestre": sem, "Décimo superior": dec, "Quinto superior": qui, "Tercio superior": ter})
         df_sup = pd.DataFrame(filas)
         if len(df_sup) > 0:
-            max_val = df_sup[["Décimo superior", "Quinto superior"]].max().max()
+            max_val = df_sup[["Décimo superior", "Quinto superior", "Tercio superior"]].max().max()
             fig = go.Figure()
             fig.add_bar(x=df_sup["Semestre"], y=df_sup["Décimo superior"],
                         name="Décimo superior", marker_color=TEAL,
@@ -116,6 +117,10 @@ def render(df_bec, df_om, semestre_sel, carrera_sel, financiador_sel):
             fig.add_bar(x=df_sup["Semestre"], y=df_sup["Quinto superior"],
                         name="Quinto superior", marker_color=EMERALD,
                         text=df_sup["Quinto superior"], textposition="outside",
+                        textfont=dict(size=10, family="JetBrains Mono"))
+            fig.add_bar(x=df_sup["Semestre"], y=df_sup["Tercio superior"],
+                        name="Tercio superior", marker_color=AMBER,
+                        text=df_sup["Tercio superior"], textposition="outside",
                         textfont=dict(size=10, family="JetBrains Mono"))
             fig.update_layout(**plotly_layout(
                 barmode="group", height=300,
