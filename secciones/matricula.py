@@ -110,7 +110,8 @@ def render(df_bec, _df_mat, semestre_sel, carrera_sel, financiador_sel):
         fig.update_traces(textposition="outside", textangle=0,
                           textfont=dict(size=10, family="JetBrains Mono"))
         fig.update_layout(**plotly_layout(
-            height=180,
+            height=320,
+            bargap=0.5,
             xaxis=dict(range=[0, est_mat["Cantidad"].max() * 1.3], visible=False),
             yaxis=dict(autorange="reversed"),
             showlegend=False,
