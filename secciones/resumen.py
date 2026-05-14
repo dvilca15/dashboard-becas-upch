@@ -92,8 +92,19 @@ def render(df_bec, semestre_sel, carrera_sel, financiador_sel):
     with col4:
         section_title("Becarios por financiador")
         fin_series = df_b["financiador"].value_counts()
-        labels, values = group_tail(fin_series, top_n=5)
-        fig = px.pie(names=labels, values=values,
+        priority = ["PRONABEC", "UPCH"]
+        p_labels, p_values = [], []
+        otros = 0
+        for fin, cnt in fin_series.items():
+            if fin in priority:
+                p_labels.append(fin)
+                p_values.append(cnt)
+            else:
+                otros += cnt
+        if otros > 0:
+            p_labels.append("Otros")
+            p_values.append(otros)
+        fig = px.pie(names=p_labels, values=p_values,
                      color_discrete_sequence=PALETTE, hole=0.45)
         fig.update_traces(**pie_traces_cfg())
         fig.update_layout(**plotly_pie_layout(height=300))
